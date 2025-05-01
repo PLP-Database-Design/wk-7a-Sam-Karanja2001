@@ -61,3 +61,57 @@ Task:
 
 ---
 Good luck 🚀
+
+
+Question 1: Achieving First Normal Form (1NF)
+Problem: The `ProductDetail` table contains a multi-valued attribute in the `Products` column.
+Solution: Convert it into atomic values by restructuring the table so that each product appears as a separate row.
+
+Example SQL transformation:
+```sql
+CREATE TABLE ProductDetail_1NF (
+    OrderID INT,
+    CustomerName VARCHAR(100),
+    Product VARCHAR(100)
+);
+
+INSERT INTO ProductDetail_1NF (OrderID, CustomerName, Product)
+VALUES 
+    (101, 'John Doe', 'Laptop'),
+    (101, 'John Doe', 'Mouse'),
+    (102, 'Jane Smith', 'Tablet'),
+    (102, 'Jane Smith', 'Keyboard'),
+    (102, 'Jane Smith', 'Mouse'),
+    (103, 'Emily Clark', 'Phone');
+```
+This eliminates multi-valued attributes, ensuring each row has atomic values.
+
+Question 2: Achieving Second Normal Form (2NF)**
+- Problem:The `OrderDetails` table has partial dependencies, meaning `CustomerName` depends on `OrderID`, not the entire primary key.
+- Solution:Split the table into two, separating customer details from order-product details
+
+Example SQL transformation:
+```sql
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE OrderProducts (
+    OrderID INT,
+    Product VARCHAR(100),
+    Quantity INT,
+    PRIMARY KEY (OrderID, Product),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+```
+Here:
+1. The `Customers` table stores customer details separately.
+2. The `Orders` table links orders to customers using `CustomerID`.
+3. The `OrderProducts` table ensures product details depend only on `OrderID` (no partial dependencies).
