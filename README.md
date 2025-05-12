@@ -62,51 +62,65 @@ Task:
 ---
 Good luck 🚀
 
-Great! Here's your final SQL script that answers both questions step-by-step in a clean and structured format, just as requested:
+ 
+
+Great! Based on the Week 7 Assignment Guide you've provided, here's how you can structure the answers.sql file to respond accurately to both questions using the exact tables and data from the guide:
 
 
 ---
 
--- Question 1: Transforming the Table into 1NF
+-- answers.sql
 
--- Create the ProductDetail table
+-- ==========================
+-- Question 1: Achieving 1NF
+-- ==========================
+
+-- Original Table:
+-- The original ProductDetail table contains atomic values, so it's already in 1NF.
+-- Each 'Products' entry is a single product per row — no multivalued attributes.
+
 CREATE TABLE ProductDetail (
     OrderID INT,
     CustomerName VARCHAR(100),
     Products VARCHAR(100)
 );
 
--- Insert atomic values (each product gets its own row)
 INSERT INTO ProductDetail(OrderID, CustomerName, Products)
 VALUES
-(101, 'John Doe', 'Laptop'),
-(101, 'John Doe', 'Mouse'),
-(102, 'Jane Smith', 'Tablet'),
-(102, 'Jane Smith', 'Keyboard'),
-(102, 'Jane Smith', 'Mouse'),
-(103, 'Emily Clark', 'Phone');
+    (101, 'John Doe', 'Laptop'),
+    (101, 'John Doe', 'Mouse'),
+    (102, 'Jane Smith', 'Tablet'),
+    (102, 'Jane Smith', 'Keyboard'),
+    (102, 'Jane Smith', 'Mouse'),
+    (103, 'Emily Clark', 'Phone');
 
-Explanation: This table now satisfies 1NF because each field contains atomic (indivisible) values.
+-- Explanation:
+-- Each row contains one product per order; the Products column does not hold multiple values.
+-- This satisfies First Normal Form (1NF), which requires atomic (indivisible) values.
 
+-- ==========================
+-- Question 2: Achieving 2NF
+-- ==========================
 
----
+-- Problem in 1NF version:
+-- The CustomerName is repeated for each order-product combination.
+-- It is only dependent on OrderID, not the full row, which creates a partial dependency.
 
--- Question 2: Transforming the Table into 2NF
+-- Step 1: Separate Order information into its own table
 
--- Create orders table (to store customer info separately)
 CREATE TABLE orders (
     OrderID INT PRIMARY KEY,
-    CustomerName VARCHAR(100)
+    customerName VARCHAR(100)
 );
 
--- Insert unique customer records
-INSERT INTO orders (OrderID, CustomerName)
+INSERT INTO orders (OrderID, customerName)
 VALUES
-(101, 'John Doe'),
-(102, 'Jane Smith'),
-(103, 'Emily Clark');
+    (101, 'John Doe'),
+    (102, 'Jane Smith'),
+    (103, 'Emily Clark');
 
--- Create product table (linked to orders via foreign key)
+-- Step 2: Store product-specific data in a separate table, linked by order_id
+
 CREATE TABLE product (
     product_id INT PRIMARY KEY,
     productName VARCHAR(100),
@@ -115,29 +129,24 @@ CREATE TABLE product (
     FOREIGN KEY (order_id) REFERENCES orders(OrderID)
 );
 
--- Insert product data with quantities and order linkage
-INSERT INTO product(product_id, productName, quantity, order_id)
-VALUES 
-(1, 'Laptop', 2, 101),
-(2, 'Mouse', 1, 101),
-(3, 'Tablet', 3, 102),
-(4, 'Keyboard', 2, 102),
-(5, 'Mouse', 1, 102),
-(6, 'Phone', 1, 103);
+INSERT INTO product (product_id, productName, quantity, order_id)
+VALUES
+    (1, 'Laptop', 2, 101),
+    (2, 'Mouse', 1, 101),
+    (3, 'Tablet', 3, 102),
+    (4, 'Keyboard', 2, 102),
+    (5, 'Mouse', 1, 102),
+    (6, 'Phone', 1, 103);
 
-Explanation:
-This design now satisfies 2NF:
-
-CustomerName is moved to a separate table where it depends only on OrderID (not on the composite key).
-
-All non-key attributes are fully dependent on the whole primary key in their respective tables.
-
+-- Explanation:
+-- 'orders' holds unique OrderID and CustomerName (CustomerName depends only on OrderID).
+-- 'product' holds details about each product and links to the corresponding order using order_id.
+-- This removes partial dependencies and ensures the structure adheres to Second Normal Form (2NF).
 
 
 ---
 
-Let me know if you'd like this packaged in a .sql file for upload to your DBMS or GitHub.
-
+Let me know if you'd like help writing 3NF, creating ER diagrams, or turning this into a .sql file download!
 
 
 
