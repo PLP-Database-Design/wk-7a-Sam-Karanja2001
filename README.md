@@ -62,30 +62,24 @@ Task:
 ---
 Good luck 🚀
 
- 
 
-Great! Based on the Week 7 Assignment Guide you've provided, here's how you can structure the answers.sql file to respond accurately to both questions using the exact tables and data from the guide:
-
-
----
 
 -- answers.sql
 
--- ==========================
--- Question 1: Achieving 1NF
--- ==========================
+-- ========================================
+-- Question 1: Achieving First Normal Form (1NF)
+-- ========================================
 
--- Original Table:
--- The original ProductDetail table contains atomic values, so it's already in 1NF.
--- Each 'Products' entry is a single product per row — no multivalued attributes.
-
+-- The original table had multivalued fields in the 'Products' column.
+-- To achieve 1NF, we split each product into a separate row.
 CREATE TABLE ProductDetail (
     OrderID INT,
     CustomerName VARCHAR(100),
     Products VARCHAR(100)
 );
 
-INSERT INTO ProductDetail(OrderID, CustomerName, Products)
+-- Each product appears in a separate row to satisfy 1NF
+INSERT INTO ProductDetail (OrderID, CustomerName, Products)
 VALUES
     (101, 'John Doe', 'Laptop'),
     (101, 'John Doe', 'Mouse'),
@@ -94,59 +88,67 @@ VALUES
     (102, 'Jane Smith', 'Mouse'),
     (103, 'Emily Clark', 'Phone');
 
--- Explanation:
--- Each row contains one product per order; the Products column does not hold multiple values.
--- This satisfies First Normal Form (1NF), which requires atomic (indivisible) values.
+-- ========================================
+-- Question 2: Achieving Second Normal Form (2NF)
+-- ========================================
 
--- ==========================
--- Question 2: Achieving 2NF
--- ==========================
+-- The 'ProductDetail' table in 1NF has a partial dependency:
+-- CustomerName depends only on OrderID, not the composite key (OrderID, Products).
+-- To achieve 2NF, we separate the data into two tables:
+-- 1. 'Orders' for customer info (depends only on OrderID)
+-- 2. 'OrderItem' for the relationship between orders and products (depends on both OrderID and ProductID)
 
--- Problem in 1NF version:
--- The CustomerName is repeated for each order-product combination.
--- It is only dependent on OrderID, not the full row, which creates a partial dependency.
-
--- Step 1: Separate Order information into its own table
-
-CREATE TABLE orders (
+-- Step 1: Create the 'Orders' table
+CREATE TABLE Orders (
     OrderID INT PRIMARY KEY,
-    customerName VARCHAR(100)
+    CustomerName VARCHAR(100)
 );
 
-INSERT INTO orders (OrderID, customerName)
+INSERT INTO Orders (OrderID, CustomerName)
 VALUES
     (101, 'John Doe'),
     (102, 'Jane Smith'),
     (103, 'Emily Clark');
 
--- Step 2: Store product-specific data in a separate table, linked by order_id
-
-CREATE TABLE product (
-    product_id INT PRIMARY KEY,
-    productName VARCHAR(100),
-    quantity INT,
-    order_id INT,
-    FOREIGN KEY (order_id) REFERENCES orders(OrderID)
+-- Step 2: Create the 'Product' table to store unique product information (for potential 3NF later)
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(100)
 );
 
-INSERT INTO product (product_id, productName, quantity, order_id)
+INSERT INTO Product (ProductID, ProductName)
 VALUES
-    (1, 'Laptop', 2, 101),
-    (2, 'Mouse', 1, 101),
-    (3, 'Tablet', 3, 102),
-    (4, 'Keyboard', 2, 102),
-    (5, 'Mouse', 1, 102),
-    (6, 'Phone', 1, 103);
+    (1, 'Laptop'),
+    (2, 'Mouse'),
+    (3, 'Tablet'),
+    (4, 'Keyboard'),
+    (5, 'Phone');
+
+-- Step 3: Create the 'OrderItem' table to link orders and products
+CREATE TABLE OrderItem (
+    OrderItemID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+INSERT INTO OrderItem (OrderItemID, OrderID, ProductID, Quantity)
+VALUES
+    (1, 101, 1, 1), -- John Doe, Laptop
+    (2, 101, 2, 1), -- John Doe, Mouse
+    (3, 102, 3, 1), -- Jane Smith, Tablet
+    (4, 102, 4, 1), -- Jane Smith, Keyboard
+    (5, 102, 2, 1), -- Jane Smith, Mouse
+    (6, 103, 5, 1); -- Emily Clark, Phone
 
 -- Explanation:
--- 'orders' holds unique OrderID and CustomerName (CustomerName depends only on OrderID).
--- 'product' holds details about each product and links to the corresponding order using order_id.
--- This removes partial dependencies and ensures the structure adheres to Second Normal Form (2NF).
+-- The 'Orders' table now holds information solely about the order.
+-- The 'Product' table holds unique product names.
+-- The 'OrderItem' table establishes a many-to-many relationship between orders and products,
+-- and the primary key (OrderItemID) ensures each item in an order is uniquely identified.
+-- This structure removes the partial dependency of CustomerName on only OrderID,
+-- thus achieving Second Normal Form (2NF).
 
-
----
-
-Let me know if you'd like help writing 3NF, creating ER diagrams, or turning this into a .sql file download!
-
-
-
+ 
