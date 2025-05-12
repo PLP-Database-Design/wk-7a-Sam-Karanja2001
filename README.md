@@ -62,56 +62,82 @@ Task:
 ---
 Good luck 🚀
 
+Great! Here's your final SQL script that answers both questions step-by-step in a clean and structured format, just as requested:
 
-Question 1: Achieving First Normal Form (1NF)
-Problem: The `ProductDetail` table contains a multi-valued attribute in the `Products` column.
-Solution: Convert it into atomic values by restructuring the table so that each product appears as a separate row.
 
-Example SQL transformation:
-```sql
-CREATE TABLE ProductDetail_1NF (
+---
+
+-- Question 1: Transforming the Table into 1NF
+
+-- Create the ProductDetail table
+CREATE TABLE ProductDetail (
     OrderID INT,
     CustomerName VARCHAR(100),
-    Product VARCHAR(100)
+    Products VARCHAR(100)
 );
 
-INSERT INTO ProductDetail_1NF (OrderID, CustomerName, Product)
-VALUES 
-    (101, 'John Doe', 'Laptop'),
-    (101, 'John Doe', 'Mouse'),
-    (102, 'Jane Smith', 'Tablet'),
-    (102, 'Jane Smith', 'Keyboard'),
-    (102, 'Jane Smith', 'Mouse'),
-    (103, 'Emily Clark', 'Phone');
-```
-This eliminates multi-valued attributes, ensuring each row has atomic values.
+-- Insert atomic values (each product gets its own row)
+INSERT INTO ProductDetail(OrderID, CustomerName, Products)
+VALUES
+(101, 'John Doe', 'Laptop'),
+(101, 'John Doe', 'Mouse'),
+(102, 'Jane Smith', 'Tablet'),
+(102, 'Jane Smith', 'Keyboard'),
+(102, 'Jane Smith', 'Mouse'),
+(103, 'Emily Clark', 'Phone');
 
-Question 2: Achieving Second Normal Form (2NF)**
-- Problem:The `OrderDetails` table has partial dependencies, meaning `CustomerName` depends on `OrderID`, not the entire primary key.
-- Solution:Split the table into two, separating customer details from order-product details
+Explanation: This table now satisfies 1NF because each field contains atomic (indivisible) values.
 
-Example SQL transformation:
-```sql
-CREATE TABLE Customers (
-    CustomerID INT PRIMARY KEY,
+
+---
+
+-- Question 2: Transforming the Table into 2NF
+
+-- Create orders table (to store customer info separately)
+CREATE TABLE orders (
+    OrderID INT PRIMARY KEY,
     CustomerName VARCHAR(100)
 );
 
-CREATE TABLE Orders (
-    OrderID INT PRIMARY KEY,
-    CustomerID INT,
-    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+-- Insert unique customer records
+INSERT INTO orders (OrderID, CustomerName)
+VALUES
+(101, 'John Doe'),
+(102, 'Jane Smith'),
+(103, 'Emily Clark');
+
+-- Create product table (linked to orders via foreign key)
+CREATE TABLE product (
+    product_id INT PRIMARY KEY,
+    productName VARCHAR(100),
+    quantity INT,
+    order_id INT,
+    FOREIGN KEY (order_id) REFERENCES orders(OrderID)
 );
 
-CREATE TABLE OrderProducts (
-    OrderID INT,
-    Product VARCHAR(100),
-    Quantity INT,
-    PRIMARY KEY (OrderID, Product),
-    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
-);
-```
-Here:
-1. The `Customers` table stores customer details separately.
-2. The `Orders` table links orders to customers using `CustomerID`.
-3. The `OrderProducts` table ensures product details depend only on `OrderID` (no partial dependencies).
+-- Insert product data with quantities and order linkage
+INSERT INTO product(product_id, productName, quantity, order_id)
+VALUES 
+(1, 'Laptop', 2, 101),
+(2, 'Mouse', 1, 101),
+(3, 'Tablet', 3, 102),
+(4, 'Keyboard', 2, 102),
+(5, 'Mouse', 1, 102),
+(6, 'Phone', 1, 103);
+
+Explanation:
+This design now satisfies 2NF:
+
+CustomerName is moved to a separate table where it depends only on OrderID (not on the composite key).
+
+All non-key attributes are fully dependent on the whole primary key in their respective tables.
+
+
+
+---
+
+Let me know if you'd like this packaged in a .sql file for upload to your DBMS or GitHub.
+
+
+
+
